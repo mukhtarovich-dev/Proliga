@@ -35,6 +35,7 @@ jobs:
         run: |
           echo "${{ secrets.PROLIGA_ENV }}" > .env.production
           echo "✅ .env.production generated successfully"
+          cat .env.production
 
       - name: Generate Prisma client
         run: pnpm exec prisma generate
