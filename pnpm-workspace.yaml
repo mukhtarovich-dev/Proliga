@@ -1,0 +1,12 @@
+packages:
+  - .
+ignoredBuiltDependencies:
+  - '@firebase/util'
+  - '@parcel/watcher'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@tailwindcss/oxide'
+  - prisma
+  - protobufjs
+  - sharp
+  - unrs-resolver

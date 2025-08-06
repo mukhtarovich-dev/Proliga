@@ -1,0 +1,94 @@
+name: Build and Deploy (Self-Hosted Windows)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Replace App
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Load environment variables from envs.txt (Windows)
+        shell: pwsh
+        run: |
+          Get-Content .\envs.txt | ForEach-Object {
+            if ($_ -notmatch '^#' -and $_ -match '=') {
+              $parts = $_ -split '=', 2
+              Add-Content -Path $env:GITHUB_ENV -Value "$($parts[0])=$($parts[1])"
+            }
+          }
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
+      - name: Prepare temp folder
+        shell: pwsh
+        run: |
+          $tempPath = "R:\proliga-temp"
+          if (Test-Path $tempPath) {
+            Remove-Item -Recurse -Force $tempPath
+          }
+          New-Item -ItemType Directory -Path $tempPath
+          Copy-Item -Path * -Destination $tempPath -Recurse -Force
+
+      - name: Stop PM2 app
+        shell: pwsh
+        run: |
+          pm2 stop proliga 2>$null
+          pm2 delete proliga 2>$null
+
+      - name: Swap folders
+        shell: pwsh
+        run: |
+          $live = "R:\proliga-live"
+          $temp = "R:\proliga-temp"
+          $old  = "R:\proliga-old"
+
+          if (Test-Path $old) {
+            Remove-Item -Recurse -Force $old
+          }
+
+          Rename-Item -Path $live -NewName "proliga-old"
+          Rename-Item -Path $temp -NewName "proliga-live"
+
+      - name: Start PM2 app
+        shell: pwsh
+        run: |
+          cd R:\proliga-live
+          pm2 start pnpm --name proliga -- run start
+          pm2 save
+
+      - name: Health Check
+        run: |
+          $response = Invoke-WebRequest -Uri http://localhost:3000/health -UseBasicParsing
+          if ($response.StatusCode -ne 200) {
+            throw "App health check failed!"
+          }
+        shell: pwsh
+

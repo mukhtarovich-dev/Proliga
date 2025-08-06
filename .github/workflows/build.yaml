@@ -1,0 +1,49 @@
+name: Build and Deploy (Self-Hosted Ubuntu)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Restart App
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.13.1
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate .env.production from GitHub Secrets
+        run: |
+          echo "${{ secrets.PROLIGA_ENV }}" > .env.production
+          echo "✅ .env.production generated successfully"
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Restart application with PM2
+        run: |
+          pm2 delete proliga 2>/dev/null || true
+          pm2 start pnpm --name proliga -- start
+          pm2 save

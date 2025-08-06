@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "uz.proliga.twa",
+      "sha256_cert_fingerprints": [
+        "8E:C7:63:BC:9F:2D:97:3A:C6:F9:92:66:23:CE:48:3A:D0:D3:E9:06:22:ED:5B:B1:9A:E8:34:A8:2D:B5:F0:D5",
+        "E8:3C:DF:5E:BA:F4:87:4E:F6:5C:7B:11:4E:25:40:BF:26:EF:1E:A5:E5:70:75:6D:47:AE:2C:82:11:76:04:91"
+      ]
+    }
+  }
+]

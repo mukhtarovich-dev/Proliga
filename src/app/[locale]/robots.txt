@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://proliga.uz/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Directories
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
