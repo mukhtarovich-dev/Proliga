@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Build & Restart App
-    runs-on: ["self-hosted","ubuntu"]
+    runs-on: self-hosted
 
     environment: production
 
