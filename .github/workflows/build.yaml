@@ -1,4 +1,4 @@
-name: Build and Deploy (Self-Hosted Ubuntu)
+name: Build and Deploy (Self-Hosted Windows)
 
 on:
   push:
@@ -11,6 +11,8 @@ jobs:
   build:
     name: Build & Restart App
     runs-on: self-hosted
+
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -31,11 +33,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Generate .env.production from GitHub Secrets
+      # ✅ Copy .env.production from hardcoded path
+      - name: Use existing .env.production
+        shell: cmd
         run: |
-          echo "${{ secrets.PROLIGA_ENV }}" > .env.production
-          echo "✅ .env.production generated successfully"
-          cat .env.production
+          copy "D:\FSystem\DEV\Git\Proliga\.env.production" .env.production
+          echo ✅ Copied .env.production to workspace
+          type .env.production
 
       - name: Generate Prisma client
         run: pnpm exec prisma generate
@@ -43,8 +47,12 @@ jobs:
       - name: Build application
         run: pnpm run build
 
+      - name: Set up PM2
+        run: npm install -g pm2
+
+      # ✅ Restart application with PM2 safely
       - name: Restart application with PM2
         run: |
-          pm2 delete proliga 2>/dev/null || true
-          pm2 start pnpm --name proliga -- start
-          pm2 save
+          npx pm2 delete proliga || echo "No old process"
+          npx pm2 start npm --name proliga -- start
+          npx pm2 save
