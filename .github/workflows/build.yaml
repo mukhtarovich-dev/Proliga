@@ -54,5 +54,5 @@ jobs:
       - name: Restart application with PM2
         run: |
           npx pm2 delete proliga || echo "No old process"
-          npx pm2 start npm --name proliga -- start
+          npx pm2 start npm --name proliga -- run start
           npx pm2 save
