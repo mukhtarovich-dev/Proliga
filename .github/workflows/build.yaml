@@ -37,7 +37,7 @@ jobs:
       - name: Use existing .env.production
         shell: cmd
         run: |
-          copy "D:\FSystem\DEV\Git\Proliga\.env.production" .env.production
+          copy "D:\FSystem\DEV\Git\ProligaUZ\Proliga\.env.production" .env.production
           echo ✅ Copied .env.production to workspace
           type .env.production
 
