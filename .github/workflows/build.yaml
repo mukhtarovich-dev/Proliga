@@ -34,12 +34,11 @@ jobs:
         run: pnpm install
 
       # ✅ Copy .env.production from hardcoded path
-      - name: Use existing .env.production
-        shell: cmd
+      - name: Generate .env.production from GitHub Secrets
         run: |
-          copy "D:\FSystem\DEV\Git\ProligaUZ\Proliga\.env.production" .env.production
-          echo ✅ Copied .env.production to workspace
-          type .env.production
+          echo "${{ secrets.PROLIGA_ENV }}" > .env.production
+          echo "✅ .env.production generated successfully"
+          cat .env.production
 
       - name: Generate Prisma client
         run: pnpm exec prisma generate
@@ -51,5 +50,5 @@ jobs:
       - name: Restart application with PM2
         run: |
           npx pm2 delete proliga || echo "No old process"
-          npx pm2 start startScript.js --name proliga_ps1
+          npx pm2 start startScript.js --name proliga
           npx pm2 save
